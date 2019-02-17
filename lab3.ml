@@ -81,7 +81,7 @@ let dot_product_pair (p1 : point_pair) (p2 : point_pair) : int =
   ......................................................................*)
 
 let dot_product_recd (p1 : point_recd) (p2 : point_recd) : int =
-  failwith "dot_product_recd not implemented" ;;
+  p1.x * p2.x + p1.y * p2.y ;;
 
 (* Converting between the pair and record representations of points
 
@@ -95,16 +95,17 @@ let dot_product_recd (p1 : point_recd) (p2 : point_recd) : int =
    point_pair to a point_recd.
    ......................................................................*)
 
-let point_pair_to_recd =
-  fun _ -> failwith "point_pair_to_recd not implemented" ;;
-
+let point_pair_to_recd (pair : point_pair) : point_recd =
+  match pair with
+  | (a, b) -> {x = a; y = b} ;;
 (*......................................................................
   Exercise 6: Write a function point_recd_to_pair that converts a
   point_recd to a point_pair.
   ......................................................................*)
 
-let point_recd_to_pair =
-  fun _ -> failwith "point_recd_to_pair not implemented" ;;
+let point_recd_to_pair (recd : point_recd) : point_pair =
+  match recd with
+  | {x = a; y = b} -> (a, b) ;;
 
 (*======================================================================
   Part 2: A simple database of records
@@ -153,7 +154,7 @@ let college =
 let transcript (enrollments : enrollment list)
     (student : int)
   : enrollment list =
-  failwith "transcript not implemented" ;;
+  List.filter (fun {id; _} -> id = student) enrollments ;;
 
 (*......................................................................
   Exercise 8: Define a function called ids that takes an enrollment
@@ -168,7 +169,7 @@ let transcript (enrollments : enrollment list)
   ......................................................................*)
 
 let ids (enrollments: enrollment list) : int list =
-  failwith "ids not implemented" ;;
+  List.sort_uniq (compare)(List.map (fun student -> student.id) enrollments) ;;
 
 (*......................................................................
   Exercise 9: Define a function called verify that determines whether all
@@ -179,9 +180,11 @@ let ids (enrollments: enrollment list) : int list =
   # verify college ;;
   - : bool = false
   ......................................................................*)
+let names (enrollments : enrollment list) : string list =
+  List.sort_uniq (compare)(List.map (fun { name; _ } -> name) enrollments) ;;
 
 let verify (enrollments : enrollment list) : bool =
-  failwith "verify not implemented" ;;
+  List.for_all (fun l -> List.length l = 1)(List.map(fun student -> names (transcript enrollments student))(ids enrollments)) ;;
 
 (*======================================================================
   Part 3: Polymorphism
@@ -204,7 +207,7 @@ let verify (enrollments : enrollment list) : bool =
   are of different lengths.)
   ......................................................................*)
 
-let rec zip (x : 'a list) (y : 'a list) : ('a * 'a) list =
+let rec zip (x : 'a list) (y : 'b list) : ('a * 'b) list =
   match x, y with
   |[], [] -> []
   |[x], [y] -> [(x,y)]
@@ -236,9 +239,7 @@ let rec zip (x : 'a list) (y : 'a list) : ('a * 'a) list =
   ......................................................................*)
 
 let partition (f : 'a -> bool) (lst : 'a list): 'a list * 'a list =
-  match lst with
-  |[] -> ([], [])
-  |lst -> (List.filter f lst, List.filter f lst) ;;
+  List.fold_right (fun elt (yeses, noes) ->if f elt then (elt :: yeses), noes else yeses, (elt :: noes))lst ([], []) ;;
 
 (*......................................................................
   Exercise 12: We can think of function application itself as a
@@ -279,5 +280,5 @@ let partition (f : 'a -> bool) (lst : 'a list): 'a list * 'a list =
   Now write the function.
   ......................................................................*)
 
-let apply =
-  fun _ -> failwith "apply not implemented" ;;
+let apply (f : 'a -> 'b) (arg : 'a) : 'b =
+  f arg ;;
